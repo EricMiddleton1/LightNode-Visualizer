@@ -1,0 +1,3 @@
+[submodule "src/LightNode"]
+	path = src/LightNode
+	url = https://github.com/ericmiddleton1/LightNode
