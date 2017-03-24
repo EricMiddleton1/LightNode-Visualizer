@@ -72,24 +72,27 @@ bool Visualizer::windowUpdate() {
 				pixel.setOutlineThickness(0);
 				pixel.setFillColor(pixelColor);
 
-				texture.draw(pixel);
+				window.draw(pixel);
 			}
 		}
 	}
-
+/*
 
 	texture.display();
 
 	sf::RenderTexture tempTexture;
 	tempTexture.create(size.x, size.y);
 	sf::Sprite sprite;
+	*/
+
+	/*
 
 	//Horizontal blur
-	shader.setUniform("dirX", 1.f);
-	shader.setUniform("dirY", 0.f);
-	shader.setUniform("blurSize", 1.f / size.x);
-	shader.setUniform("sigma", xSigma);
-	shader.setUniform("numBlurPixelsPerSide", xKernelSize/2 - 1.f);
+	shader.setParameter("dirX", 1.f);
+	shader.setParameter("dirY", 0.f);
+	shader.setParameter("blurSize", 1.f / size.x);
+	shader.setParameter("sigma", xSigma);
+	shader.setParameter("numBlurPixelsPerSide", xKernelSize/2 - 1.f);
 	sprite = sf::Sprite(texture.getTexture());
 	tempTexture.draw(sprite, &shader);
 	tempTexture.display();
@@ -100,11 +103,11 @@ bool Visualizer::windowUpdate() {
 	texture.display();
 
 	//Vertical blur
-	shader.setUniform("dirX", 0.f);
-	shader.setUniform("dirY", 1.f);
-	shader.setUniform("blurSize", 1.f / size.y);
-	shader.setUniform("sigma", ySigma);
-	shader.setUniform("numBlurPixelsPerSide", yKernelSize/2 - 1.f);
+	shader.setParameter("dirX", 0.f);
+	shader.setParameter("dirY", 1.f);
+	shader.setParameter("blurSize", 1.f / size.y);
+	shader.setParameter("sigma", ySigma);
+	shader.setParameter("numBlurPixelsPerSide", yKernelSize/2 - 1.f);
 	sprite = sf::Sprite(texture.getTexture());
 	tempTexture.draw(sprite, &shader);
 	tempTexture.display();
@@ -112,6 +115,12 @@ bool Visualizer::windowUpdate() {
 	//Second pass vertical blur
 	sprite = sf::Sprite(tempTexture.getTexture());
 	window.draw(sprite, &shader);
+	window.display();
+
+	sprite = sf::Sprite(texture.getTexture());
+	window.draw(sprite);
+	*/
+
 	window.display();
 	
 	return true;
