@@ -1,15 +1,21 @@
 #pragma once
 
+#include <vector>
+#include <string>
+#include <mutex>
+
+#include <boost/asio.hpp>
 
 #include <SFML/Graphics.hpp>
 
-#include "LightNode/LightStripMatrix.hpp"
+#include "LightNode/Light.hpp"
 
 
-class Visualizer : public LightStripMatrix
+class Visualizer : public Light
 {
 public:
-	Visualizer(unsigned char matrixWidth, unsigned char matrixHeight);
+	Visualizer(boost::asio::io_service& ioService, const std::string& name,
+		int matrixWidth, int matrixHeight);
 	~Visualizer();
 	
 	bool windowUpdate();
@@ -17,10 +23,15 @@ public:
 private:
 	virtual void update() override;
 
+	int matrixWidth, matrixHeight;
+	std::vector<Color> colors;
+
 	sf::RenderWindow window;
 	sf::RenderTexture texture;
 	sf::Shader shader;
 
 	float xSigma, ySigma;
 	unsigned int xKernelSize, yKernelSize;
+
+	std::mutex ledMutex;
 };

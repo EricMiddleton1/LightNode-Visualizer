@@ -6,9 +6,13 @@
 #include <SFML/Window.hpp>
 #include <SFML/Window/VideoMode.hpp>
 
-Visualizer::Visualizer(unsigned char _matrixWidth, unsigned char _matrixHeight)
-	:	LightStripMatrix(_matrixWidth, _matrixHeight)
-	,	window(sf::VideoMode(1920, 1080), "LightNode - Visualizer",
+Visualizer::Visualizer(boost::asio::io_service& _ioService, const std::string& _name,
+	int _matrixWidth, int _matrixHeight)
+	:	Light{_ioService, _name, _matrixWidth*_matrixHeight}
+	,	matrixWidth{_matrixWidth}
+	,	matrixHeight{_matrixHeight}
+	,	colors(matrixWidth*matrixHeight)
+	,	window(sf::VideoMode(1920, 1080), _name,
 		sf::Style::Fullscreen) {
 	
 	window.setVerticalSyncEnabled(true);
@@ -53,17 +57,18 @@ bool Visualizer::windowUpdate() {
 	}
 
 	auto size = window.getSize();
-	unsigned int pixelWidth = size.x/width,
-		pixelHeight = size.y/height;
-	unsigned int offsetX = (size.x - pixelWidth*width)/2,
-		offsetY = (size.y - pixelHeight*height)/2;
+	unsigned int pixelWidth = size.x/matrixWidth,
+		pixelHeight = size.y/matrixHeight;
+	unsigned int offsetX = (size.x - pixelWidth*matrixWidth)/2,
+		offsetY = (size.y - pixelHeight*matrixHeight)/2;
 	
 	{
 		std::unique_lock<std::mutex> ledLock(ledMutex);
 
-		for(unsigned int y = 0; y < height; ++y) {
-			for(unsigned int x = 0; x < width; ++x) {
-				auto& c = leds[y*width + x];
+		for(unsigned int y = 0; y < matrixHeight; ++y) {
+			for(unsigned int x = 0; x < matrixWidth; ++x) {
+				int pixelX = (y & 0x01) ? (matrixWidth - x - 1) : x;
+				auto& c = colors[y*matrixWidth + pixelX];
 
 				sf::RectangleShape pixel(sf::Vector2f(pixelWidth, pixelHeight));
 				sf::Color pixelColor(c.getRed(), c.getGreen(), c.getBlue());
@@ -73,19 +78,17 @@ bool Visualizer::windowUpdate() {
 				pixel.setFillColor(pixelColor);
 
 				window.draw(pixel);
+				//texture.draw(pixel);
 			}
 		}
 	}
 /*
-
 	texture.display();
 
 	sf::RenderTexture tempTexture;
 	tempTexture.create(size.x, size.y);
 	sf::Sprite sprite;
-	*/
 
-	/*
 
 	//Horizontal blur
 	shader.setParameter("dirX", 1.f);
@@ -98,9 +101,9 @@ bool Visualizer::windowUpdate() {
 	tempTexture.display();
 
 	//Second pass horizontal blur
-	sprite = sf::Sprite(tempTexture.getTexture());
-	texture.draw(sprite, &shader);
-	texture.display();
+	//sprite = sf::Sprite(tempTexture.getTexture());
+	//texture.draw(sprite, &shader);
+	//texture.display();
 
 	//Vertical blur
 	shader.setParameter("dirX", 0.f);
@@ -113,18 +116,22 @@ bool Visualizer::windowUpdate() {
 	tempTexture.display();
 
 	//Second pass vertical blur
+	//sprite = sf::Sprite(tempTexture.getTexture());
+	//window.draw(sprite, &shader);
+	//window.display();
+
 	sprite = sf::Sprite(tempTexture.getTexture());
-	window.draw(sprite, &shader);
-	window.display();
-
-	sprite = sf::Sprite(texture.getTexture());
 	window.draw(sprite);
-	*/
-
+*/
 	window.display();
 	
 	return true;
 }
 
 void Visualizer::update() {
+	std::lock_guard<std::mutex> ledLock(ledMutex);
+
+	for(int i = 0; i < colors.size(); ++i) {
+		colors[i] = leds[i].getColor();
+	}
 }
