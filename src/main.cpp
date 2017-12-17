@@ -10,8 +10,8 @@
 
 
 int main(int argc, char *argv[]) {
-	if(argc != 3) {
-		std::cout << "Usage: " << argv[0] << " matrixWidth matrixHeight" << std::endl;
+	if(argc != 4) {
+		std::cout << "Usage: " << argv[0] << " name matrixWidth matrixHeight" << std::endl;
 		return 1;
 	}
 	
@@ -21,9 +21,9 @@ int main(int argc, char *argv[]) {
 	std::thread ioThread([&ioService](){ ioService.run(); std::cout << "ioService done\n"; });
 
 	auto visualizer = std::make_shared<Visualizer>
-		(ioService, "LightNode - Visualizer", std::stoi(argv[1]), std::stoi(argv[2]));
+		(ioService, "LightNode - Visualizer", std::stoi(argv[2]), std::stoi(argv[3]));
 	
-	LightNode lightNode({visualizer}, "Visualizer");
+	LightNode lightNode({visualizer}, argv[1]);
 
 	while(visualizer->windowUpdate()) {
 		std::this_thread::sleep_for(std::chrono::milliseconds(5));
